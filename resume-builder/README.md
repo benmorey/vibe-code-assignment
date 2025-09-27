@@ -13,6 +13,14 @@ A powerful React-based resume builder that uses Google's Gemini AI to customize 
   - Volunteer work
   - Skills
 
+- **Smart Data Management**:
+  - Auto-save as you type (every 2 seconds)
+  - Manual save with visual feedback
+  - Automatic backups (keeps last 5 versions)
+  - Export/Import profile data as JSON
+  - Data validation and error handling
+  - Real-time save status notifications
+
 - **AI-Powered Customization**:
   - Paste job descriptions to get AI-customized resumes
   - Generate tailored cover letters
@@ -72,7 +80,9 @@ The app will be available at `http://localhost:3000`
    - Volunteer Work: Community involvement
    - Skills: Organized by category (Programming Languages, Tools, etc.)
 
-4. **Save Profile**: Click "Save Profile" to store your information
+4. **Auto-Save**: Your profile is automatically saved as you type
+5. **Manual Save**: Click "Save Profile" for immediate save with confirmation
+6. **Export/Import**: Use the header buttons to backup or restore your profile data
 
 ### Generating Custom Resumes
 
@@ -112,7 +122,8 @@ The app will be available at `http://localhost:3000`
 ### Browser Compatibility
 - Modern browsers (Chrome, Firefox, Safari, Edge)
 - JavaScript must be enabled
-- Local storage required for saving profiles
+- Local storage required for saving profiles (5MB+ recommended)
+- File API support needed for import/export features
 
 ## Development
 
@@ -128,8 +139,19 @@ To preview the production build:
 npm run preview
 ```
 
-## Security Notes
+## Data Storage & Security
 
-- API keys are stored in environment variables
-- Profile data is stored locally (not sent to external servers except Google AI)
-- All AI processing happens through Google's secure API endpoints
+- **Local Storage**: All profile data is stored in your browser's localStorage
+- **Automatic Backups**: App keeps 5 automatic backups with timestamps
+- **Export/Import**: Full control over your data with JSON export/import
+- **API Security**: API keys stored in environment variables only
+- **Privacy**: Profile data never leaves your device except for AI processing
+- **Data Validation**: Imported data is validated for security and structure
+
+## Storage Management
+
+- Your data persists between browser sessions
+- Automatic cleanup of old backups
+- Export your data anytime for backup
+- Import previously exported profiles
+- Clear all data option available in browser developer tools
