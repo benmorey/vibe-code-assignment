@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ProfileData, ExperienceType } from '../types';
 import PersonalInfoForm from './PersonalInfoForm';
 import AboutMeForm from './AboutMeForm';
@@ -12,22 +12,51 @@ interface ProfileBuilderProps {
 
 const ProfileBuilder: React.FC<ProfileBuilderProps> = ({ profileData, onSave }) => {
   const [currentData, setCurrentData] = useState<ProfileData>(profileData);
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
+
+  // Update local state when profileData prop changes
+  useEffect(() => {
+    setCurrentData(profileData);
+  }, [profileData]);
+
+  // Auto-save functionality
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (saveStatus === 'idle') {
+        handleAutoSave();
+      }
+    }, 2000); // Auto-save after 2 seconds of no changes
+
+    return () => clearTimeout(timer);
+  }, [currentData]);
+
+  const handleAutoSave = () => {
+    setSaveStatus('saving');
+    onSave(currentData);
+    setSaveStatus('saved');
+    setTimeout(() => setSaveStatus('idle'), 1500);
+  };
 
   const handlePersonalInfoChange = (personalInfo: ProfileData['personalInfo']) => {
     setCurrentData(prev => ({ ...prev, personalInfo }));
+    setSaveStatus('idle');
   };
 
   const handleAboutMeChange = (aboutMe: string) => {
     setCurrentData(prev => ({ ...prev, aboutMe }));
+    setSaveStatus('idle');
   };
 
   const handleExperienceChange = (type: ExperienceType, data: any[]) => {
     setCurrentData(prev => ({ ...prev, [type]: data }));
+    setSaveStatus('idle');
   };
 
   const handleSave = () => {
+    setSaveStatus('saving');
     onSave(currentData);
-    alert('Profile saved successfully!');
+    setSaveStatus('saved');
+    setTimeout(() => setSaveStatus('idle'), 1500);
   };
 
   const addExperience = (type: ExperienceType) => {
@@ -37,6 +66,7 @@ const ProfileBuilder: React.FC<ProfileBuilderProps> = ({ profileData, onSave }) 
       ...prev,
       [type]: [...currentItems, newItem]
     }));
+    setSaveStatus('idle');
   };
 
   const createNewExperienceItem = (type: ExperienceType) => {
@@ -155,9 +185,24 @@ const ProfileBuilder: React.FC<ProfileBuilderProps> = ({ profileData, onSave }) 
       </div>
 
       <div style={{ textAlign: 'center', marginTop: '30px' }}>
-        <button className="btn btn-primary" onClick={handleSave} style={{ fontSize: '16px', padding: '12px 24px' }}>
-          Save Profile
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '15px' }}>
+          <button
+            className="btn btn-primary"
+            onClick={handleSave}
+            style={{ fontSize: '16px', padding: '12px 24px' }}
+            disabled={saveStatus === 'saving'}
+          >
+            {saveStatus === 'saving' ? 'Saving...' : 'Save Profile'}
+          </button>
+          {saveStatus === 'saved' && (
+            <span style={{ color: '#059669', fontSize: '14px', fontWeight: '500' }}>
+              ✓ Auto-saved
+            </span>
+          )}
+        </div>
+        <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '10px' }}>
+          Your profile is automatically saved as you type
+        </p>
       </div>
     </div>
   );
