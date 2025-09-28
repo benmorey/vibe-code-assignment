@@ -4,6 +4,7 @@ import PersonalInfoForm from './PersonalInfoForm';
 import AboutMeForm from './AboutMeForm';
 import ExperienceSection from './ExperienceSection';
 import AddExperienceDropdown from './AddExperienceDropdown';
+import ResumeUpload from './ResumeUpload';
 
 interface ProfileBuilderProps {
   profileData: ProfileData;
@@ -124,8 +125,18 @@ const ProfileBuilder: React.FC<ProfileBuilderProps> = ({ profileData, onSave }) 
     }
   };
 
+  const handleResumeDataParsed = (parsedData: ProfileData) => {
+    setCurrentData(parsedData);
+    setSaveStatus('idle');
+  };
+
   return (
     <div>
+      <ResumeUpload
+        onDataParsed={handleResumeDataParsed}
+        currentProfile={currentData}
+      />
+
       <div className="card">
         <h2 style={{ marginBottom: '20px', color: '#1f2937' }}>Personal Information</h2>
         <PersonalInfoForm

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import ProfileBuilder from './components/ProfileBuilder';
 import ResumeGenerator from './components/ResumeGenerator';
+import ResumeComparison from './components/ResumeComparison';
 import SaveStatus from './components/SaveStatus';
 import { ProfileData } from './types';
 import { StorageService } from './services/storageService';
@@ -23,7 +24,7 @@ const defaultProfile: ProfileData = {
 };
 
 function App() {
-  const [activeTab, setActiveTab] = useState<'profile' | 'resume'>('profile');
+  const [activeTab, setActiveTab] = useState<'profile' | 'resume' | 'comparison'>('profile');
   const [profileData, setProfileData] = useState<ProfileData>(defaultProfile);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [showSaveStatus, setShowSaveStatus] = useState(false);
@@ -101,6 +102,12 @@ function App() {
           >
             Generate Resume
           </button>
+          <button
+            className={`tab ${activeTab === 'comparison' ? 'active' : ''}`}
+            onClick={() => setActiveTab('comparison')}
+          >
+            Resume Analysis
+          </button>
         </div>
 
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
@@ -128,6 +135,12 @@ function App() {
 
       {activeTab === 'resume' && (
         <ResumeGenerator
+          profileData={profileData}
+        />
+      )}
+
+      {activeTab === 'comparison' && (
+        <ResumeComparison
           profileData={profileData}
         />
       )}
