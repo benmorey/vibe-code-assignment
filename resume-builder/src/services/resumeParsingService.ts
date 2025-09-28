@@ -1,5 +1,6 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { supabase } from './supabaseClient';
+import mammoth from 'mammoth';
 
 export interface ParsedResumeData {
   personalInfo: {
@@ -62,14 +63,33 @@ export class ResumeParsingService {
 
   async uploadAndParseResume(file: File): Promise<ParsedResumeData> {
     try {
-      // Upload file to Supabase Storage
-      const fileName = `resume_${Date.now()}_${file.name}`;
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('resumes')
-        .upload(fileName, file);
+      let uploadData = null;
 
-      if (uploadError) {
-        throw new Error(`Failed to upload resume: ${uploadError.message}`);
+      // Try Supabase upload, but continue if it fails
+      if (supabase) {
+        console.log('Supabase client available, attempting upload...');
+        const fileName = `resume_${Date.now()}_${file.name}`;
+        console.log('Upload filename:', fileName);
+
+        try {
+          const result = await supabase.storage
+            .from('resume_pdfs_test')
+            .upload(fileName, file, {
+              upsert: false,
+              contentType: file.type
+            });
+
+          if (result.error) {
+            console.warn('Storage upload failed, continuing with local processing:', result.error.message);
+          } else {
+            uploadData = result.data;
+            console.log('Upload successful:', uploadData);
+          }
+        } catch (storageError) {
+          console.warn('Storage upload failed, continuing with local processing:', storageError);
+        }
+      } else {
+        console.log('Supabase not configured - processing file locally only');
       }
 
       // Extract text from the uploaded file
@@ -79,26 +99,36 @@ export class ResumeParsingService {
         resumeText = await this.extractTextFromPDF(file);
       } else if (file.type === 'text/plain') {
         resumeText = await this.extractTextFromTxt(file);
+      } else if (file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || file.name.endsWith('.docx')) {
+        resumeText = await this.extractTextFromDocx(file);
       } else {
-        throw new Error('Unsupported file type. Please upload a PDF or TXT file.');
+        throw new Error('Unsupported file type. Please upload a PDF, DOCX, or TXT file.');
       }
 
       // Parse the resume text using AI
       const parsedData = await this.parseResumeWithAI(resumeText);
 
-      // Store the parsed data in Supabase (optional)
-      const { error: dbError } = await supabase
-        .from('parsed_resumes')
-        .insert({
-          file_name: fileName,
-          file_path: uploadData.path,
-          parsed_data: parsedData,
-          created_at: new Date().toISOString()
-        });
+      // Store the parsed data in Supabase (optional, only if upload succeeded)
+      if (supabase && uploadData) {
+        try {
+          const { error: dbError } = await supabase
+            .from('parsed_resumes')
+            .insert({
+              file_name: fileName,
+              file_path: uploadData.path || '',
+              parsed_data: parsedData,
+              created_at: new Date().toISOString()
+            });
 
-      if (dbError) {
-        console.warn('Failed to store parsed data in database:', dbError.message);
-        // Don't throw error here - the parsing was successful
+          if (dbError) {
+            console.warn('Failed to store parsed data in database:', dbError.message);
+          }
+        } catch (error) {
+          console.warn('Database operation failed:', error);
+          // Continue anyway - the parsing was successful
+        }
+      } else {
+        console.log('Skipping database storage - no upload data or Supabase not available');
       }
 
       return parsedData;
@@ -147,6 +177,22 @@ export class ResumeParsingService {
       reader.onerror = () => reject(new Error('Failed to read text file'));
       reader.readAsText(file);
     });
+  }
+
+  private async extractTextFromDocx(file: File): Promise<string> {
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      const result = await mammoth.extractRawText({ arrayBuffer });
+
+      if (result.value) {
+        return result.value;
+      } else {
+        throw new Error('No text content found in Word document');
+      }
+    } catch (error) {
+      console.error('Error extracting text from Word document:', error);
+      throw new Error('Failed to extract text from Word document. Please try a different format.');
+    }
   }
 
   private async parseResumeWithAI(resumeText: string): Promise<ParsedResumeData> {
@@ -304,9 +350,14 @@ ${resumeText}
 
   async deleteUploadedResume(fileName: string): Promise<void> {
     try {
+      if (!supabase) {
+        console.log('Supabase not configured - no files to delete from storage');
+        return;
+      }
+
       // Delete from storage
       const { error: storageError } = await supabase.storage
-        .from('resumes')
+        .from('resume_pdfs_test')
         .remove([fileName]);
 
       if (storageError) {

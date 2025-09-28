@@ -144,7 +144,7 @@ const ResumeUpload: React.FC<ResumeUploadProps> = ({ onDataParsed, currentProfil
         <input
           ref={fileInputRef}
           type="file"
-          accept=".pdf,.txt"
+          accept=".pdf,.txt,.docx"
           onChange={handleFileSelect}
           style={{ display: 'none' }}
         />
