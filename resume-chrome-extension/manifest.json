@@ -1,0 +1,18 @@
+{
+  "manifest_version": 3,
+  "name": "Resume Builder Quick Apply",
+  "version": "1.0",
+  "description": "Generate customized resumes for job applications",
+  "permissions": [
+    "storage",
+    "downloads",
+    "scripting",
+    "tabs"
+  ],
+  "host_permissions": [
+    "http://localhost:3001/*"
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  }
+}

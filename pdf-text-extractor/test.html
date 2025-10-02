@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Text Extractor - Simple Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .upload-area {
+            border: 2px dashed #ccc;
+            padding: 40px;
+            text-align: center;
+            margin: 20px 0;
+            cursor: pointer;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f5f5f5;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            color: #666;
+        }
+        .error {
+            color: red;
+            padding: 10px;
+            background: #ffe6e6;
+            border-radius: 5px;
+        }
+        #fileInput {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>PDF Text Extractor - Test Version</h1>
+
+    <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+        <h3>Click here to select a PDF file</h3>
+        <p>Simple test version - debugging enabled</p>
+    </div>
+
+    <input type="file" id="fileInput" accept=".pdf" />
+
+    <div class="loading" id="loading">
+        <p>Processing PDF...</p>
+    </div>
+
+    <div id="result"></div>
+
+    <script>
+        console.log('Script loaded');
+
+        const fileInput = document.getElementById('fileInput');
+        const loading = document.getElementById('loading');
+        const result = document.getElementById('result');
+
+        fileInput.addEventListener('change', function(e) {
+            console.log('File input changed');
+            const file = e.target.files[0];
+            console.log('File selected:', file);
+
+            if (file) {
+                if (file.type === 'application/pdf') {
+                    console.log('Valid PDF file, processing...');
+                    processFile(file);
+                } else {
+                    showError('Please select a PDF file. Selected type: ' + file.type);
+                }
+            }
+        });
+
+        function showError(message) {
+            result.innerHTML = `<div class="error">${message}</div>`;
+        }
+
+        function showLoading(show) {
+            loading.style.display = show ? 'block' : 'none';
+        }
+
+        async function processFile(file) {
+            try {
+                showLoading(true);
+                result.innerHTML = '';
+
+                console.log('Starting file processing...');
+                console.log('File details:', {
+                    name: file.name,
+                    size: file.size,
+                    type: file.type
+                });
+
+                // Simple test - just try to read the file as ArrayBuffer
+                const arrayBuffer = await file.arrayBuffer();
+                console.log('ArrayBuffer created, size:', arrayBuffer.byteLength);
+
+                // For now, just show that we successfully read the file
+                result.innerHTML = `
+                    <div>
+                        <h3>✅ File Read Successfully</h3>
+                        <p><strong>Name:</strong> ${file.name}</p>
+                        <p><strong>Size:</strong> ${formatFileSize(file.size)}</p>
+                        <p><strong>Type:</strong> ${file.type}</p>
+                        <p><strong>ArrayBuffer Size:</strong> ${arrayBuffer.byteLength} bytes</p>
+                        <p><em>File reading works! PDF parsing will be added next.</em></p>
+                    </div>
+                `;
+
+            } catch (error) {
+                console.error('Error processing file:', error);
+                showError('Error processing file: ' + error.message);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        console.log('Test page ready');
+    </script>
+</body>
+</html>

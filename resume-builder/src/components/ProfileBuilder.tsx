@@ -4,7 +4,7 @@ import PersonalInfoForm from './PersonalInfoForm';
 import AboutMeForm from './AboutMeForm';
 import ExperienceSection from './ExperienceSection';
 import AddExperienceDropdown from './AddExperienceDropdown';
-import ResumeUpload from './ResumeUpload';
+import PDFImporter from './PDFImporter';
 
 interface ProfileBuilderProps {
   profileData: ProfileData;
@@ -58,6 +58,42 @@ const ProfileBuilder: React.FC<ProfileBuilderProps> = ({ profileData, onSave }) 
     onSave(currentData);
     setSaveStatus('saved');
     setTimeout(() => setSaveStatus('idle'), 1500);
+  };
+
+  const handlePDFImport = (importedProfile: Partial<ProfileData>) => {
+    console.log('Importing profile data from PDF:', importedProfile);
+
+    // Merge imported data with current data, preserving existing data where imported data is empty
+    const mergedData: ProfileData = {
+      personalInfo: {
+        ...currentData.personalInfo,
+        ...importedProfile.personalInfo
+      },
+      aboutMe: importedProfile.aboutMe || currentData.aboutMe,
+      education: importedProfile.education && importedProfile.education.length > 0
+        ? importedProfile.education
+        : currentData.education,
+      workExperience: importedProfile.workExperience && importedProfile.workExperience.length > 0
+        ? importedProfile.workExperience
+        : currentData.workExperience,
+      projects: importedProfile.projects && importedProfile.projects.length > 0
+        ? importedProfile.projects
+        : currentData.projects,
+      volunteerWork: importedProfile.volunteerWork && importedProfile.volunteerWork.length > 0
+        ? importedProfile.volunteerWork
+        : currentData.volunteerWork,
+      skills: importedProfile.skills && importedProfile.skills.length > 0
+        ? importedProfile.skills
+        : currentData.skills
+    };
+
+    setCurrentData(mergedData);
+    setSaveStatus('idle');
+
+    // Auto-save the imported data
+    setTimeout(() => {
+      onSave(mergedData);
+    }, 100);
   };
 
   const addExperience = (type: ExperienceType) => {
@@ -125,16 +161,10 @@ const ProfileBuilder: React.FC<ProfileBuilderProps> = ({ profileData, onSave }) 
     }
   };
 
-  const handleResumeDataParsed = (parsedData: ProfileData) => {
-    setCurrentData(parsedData);
-    setSaveStatus('idle');
-  };
-
   return (
     <div>
-      <ResumeUpload
-        onDataParsed={handleResumeDataParsed}
-        currentProfile={currentData}
+      <PDFImporter
+        onProfileImported={handlePDFImport}
       />
 
       <div className="card">

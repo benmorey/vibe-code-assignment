@@ -6,6 +6,8 @@ interface JobDescriptionInputProps {
   onGenerateResume: () => void;
   onGenerateCoverLetter: () => void;
   isGenerating: boolean;
+  companyName: string;
+  onCompanyNameChange: (value: string) => void;
 }
 
 const JobDescriptionInput: React.FC<JobDescriptionInputProps> = ({
@@ -13,11 +15,24 @@ const JobDescriptionInput: React.FC<JobDescriptionInputProps> = ({
   onChange,
   onGenerateResume,
   onGenerateCoverLetter,
-  isGenerating
+  isGenerating,
+  companyName,
+  onCompanyNameChange
 }) => {
   return (
     <div className="card">
-      <h2 style={{ marginBottom: '20px', color: '#1f2937' }}>Job Description</h2>
+      <h2 style={{ marginBottom: '20px', color: '#1f2937' }}>Job Information</h2>
+
+      <div className="form-group">
+        <label className="form-label">Company Name (Optional)</label>
+        <input
+          type="text"
+          className="form-input"
+          value={companyName}
+          onChange={(e) => onCompanyNameChange(e.target.value)}
+          placeholder="e.g., Google, Microsoft, Startup Inc."
+        />
+      </div>
 
       <div className="form-group">
         <label className="form-label">Paste the job description here *</label>

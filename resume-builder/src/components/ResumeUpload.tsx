@@ -22,10 +22,10 @@ const ResumeUpload: React.FC<ResumeUploadProps> = ({ onDataParsed, currentProfil
     if (!file) return;
 
     // Validate file type
-    if (!['application/pdf', 'text/plain'].includes(file.type)) {
+    if (!['application/pdf', 'text/plain', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'].includes(file.type) && !file.name.endsWith('.docx')) {
       setUploadStatus({
         type: 'error',
-        message: 'Please upload a PDF or TXT file only.'
+        message: 'Please upload a PDF, DOCX, or TXT file only.'
       });
       return;
     }

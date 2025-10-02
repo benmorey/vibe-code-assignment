@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import ProfileBuilder from './components/ProfileBuilder';
 import ResumeGenerator from './components/ResumeGenerator';
 import ResumeComparison from './components/ResumeComparison';
+import JobSearch from './components/JobSearch';
 import SaveStatus from './components/SaveStatus';
 import { ProfileData } from './types';
 import { StorageService } from './services/storageService';
@@ -24,10 +25,11 @@ const defaultProfile: ProfileData = {
 };
 
 function App() {
-  const [activeTab, setActiveTab] = useState<'profile' | 'resume' | 'comparison'>('profile');
+  const [activeTab, setActiveTab] = useState<'profile' | 'resume' | 'comparison' | 'jobs'>('profile');
   const [profileData, setProfileData] = useState<ProfileData>(defaultProfile);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [showSaveStatus, setShowSaveStatus] = useState(false);
+  const [selectedJob, setSelectedJob] = useState<any>(null);
 
   useEffect(() => {
     const saved = StorageService.loadProfile();
@@ -84,12 +86,12 @@ function App() {
     <div className="container">
       {showSaveStatus && <SaveStatus lastSaved={lastSaved} isAutoSave={true} />}
 
-      <h1 style={{ textAlign: 'center', marginBottom: '30px', fontSize: '32px', color: '#1f2937' }}>
-        AI Resume Builder
-      </h1>
+      <div className="sidebar">
+        <h1 style={{ textAlign: 'center', padding: '0 20px', marginBottom: '30px', fontSize: '28px', color: '#1f2937', fontWeight: '700' }}>
+          AI Resume Builder
+        </h1>
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <div className="tabs" style={{ marginBottom: 0 }}>
+        <div className="tabs">
           <button
             className={`tab ${activeTab === 'profile' ? 'active' : ''}`}
             onClick={() => setActiveTab('profile')}
@@ -108,13 +110,19 @@ function App() {
           >
             Resume Analysis
           </button>
+          <button
+            className={`tab ${activeTab === 'jobs' ? 'active' : ''}`}
+            onClick={() => setActiveTab('jobs')}
+          >
+            Job Search
+          </button>
         </div>
 
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-          <button className="btn btn-secondary" onClick={exportProfile}>
+        <div style={{ padding: '20px', marginTop: '30px', borderTop: '1px solid #e5e7eb' }}>
+          <button className="btn btn-secondary" onClick={exportProfile} style={{ width: '100%', marginBottom: '10px' }}>
             Export Profile
           </button>
-          <label className="btn btn-secondary" style={{ cursor: 'pointer', margin: 0 }}>
+          <label className="btn btn-secondary" style={{ cursor: 'pointer', margin: 0, width: '100%', display: 'block', textAlign: 'center' }}>
             Import Profile
             <input
               type="file"
@@ -126,24 +134,39 @@ function App() {
         </div>
       </div>
 
-      {activeTab === 'profile' && (
-        <ProfileBuilder
-          profileData={profileData}
-          onSave={saveProfile}
-        />
-      )}
+      <div className="main-content">
+        <div className="page-transition">
+          {activeTab === 'profile' && (
+            <ProfileBuilder
+              profileData={profileData}
+              onSave={saveProfile}
+            />
+          )}
 
-      {activeTab === 'resume' && (
-        <ResumeGenerator
-          profileData={profileData}
-        />
-      )}
+          {activeTab === 'resume' && (
+            <ResumeGenerator
+              profileData={profileData}
+              onProfileUpdated={saveProfile}
+            />
+          )}
 
-      {activeTab === 'comparison' && (
-        <ResumeComparison
-          profileData={profileData}
-        />
-      )}
+          {activeTab === 'comparison' && (
+            <ResumeComparison
+              profileData={profileData}
+            />
+          )}
+
+          {activeTab === 'jobs' && (
+            <JobSearch
+              profileData={profileData}
+              onJobSelect={(job) => {
+                setSelectedJob(job);
+                alert(`Job selected: ${job.title} at ${job.company}\n\nYou can now generate a custom resume for this position!`);
+              }}
+            />
+          )}
+        </div>
+      </div>
     </div>
   );
 }

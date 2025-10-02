@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Resume Builder</title>
+  <style>
+    body {
+      width: 400px;
+      padding: 20px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+      margin: 0;
+    }
+    h2 {
+      margin: 0 0 15px 0;
+      color: #1f2937;
+      font-size: 18px;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 500;
+      color: #374151;
+      font-size: 14px;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #d1d5db;
+      border-radius: 4px;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+    textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    button:hover {
+      background-color: #1d4ed8;
+    }
+    button:disabled {
+      background-color: #9ca3af;
+      cursor: not-allowed;
+    }
+    .status {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 4px;
+      font-size: 13px;
+      display: none;
+    }
+    .status.success {
+      background-color: #d1fae5;
+      color: #065f46;
+      display: block;
+    }
+    .status.error {
+      background-color: #fee2e2;
+      color: #991b1b;
+      display: block;
+    }
+    .status.info {
+      background-color: #dbeafe;
+      color: #1e40af;
+      display: block;
+    }
+    .sync-btn {
+      background-color: #059669;
+      margin-bottom: 15px;
+    }
+    .sync-btn:hover {
+      background-color: #047857;
+    }
+  </style>
+</head>
+<body>
+  <h2>📄 Quick Resume Generator</h2>
+
+  <button id="syncBtn" class="sync-btn">🔄 Sync Profile from App</button>
+
+  <div class="form-group">
+    <label for="jobTitle">Job Title</label>
+    <input type="text" id="jobTitle" placeholder="e.g., Senior Software Engineer">
+  </div>
+
+  <div class="form-group">
+    <label for="jobDescription">Job Description</label>
+    <textarea id="jobDescription" placeholder="Paste the full job description here..."></textarea>
+  </div>
+
+  <button id="generateBtn">✨ Generate Custom Resume PDF</button>
+
+  <div id="status" class="status"></div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

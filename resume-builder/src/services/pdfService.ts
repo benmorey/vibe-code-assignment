@@ -9,36 +9,64 @@ export async function downloadResumePDF(profileData: ProfileData): Promise<void>
   }
 
   try {
+    // Store original styles
+    const originalFontSize = element.style.fontSize;
+    const originalLineHeight = element.style.lineHeight;
+    const originalPadding = element.style.padding;
+    const originalMargin = element.style.margin;
+    const originalWidth = element.style.width;
+
+    // Apply compact styles for PDF
+    element.style.fontSize = '9px';
+    element.style.lineHeight = '1.1';
+    element.style.padding = '20px';
+    element.style.margin = '0';
+    element.style.width = '700px';
+
+    // Wait for reflow
+    await new Promise(resolve => setTimeout(resolve, 100));
+
     // Create canvas from the resume element
     const canvas = await html2canvas(element, {
-      scale: 2, // Higher resolution
+      scale: 2,
       useCORS: true,
       allowTaint: true,
-      backgroundColor: '#ffffff'
+      backgroundColor: '#ffffff',
+      width: 700,
+      windowWidth: 700
     });
+
+    // Restore original styles
+    element.style.fontSize = originalFontSize;
+    element.style.lineHeight = originalLineHeight;
+    element.style.padding = originalPadding;
+    element.style.margin = originalMargin;
+    element.style.width = originalWidth;
 
     const imgData = canvas.toDataURL('image/png');
 
-    // Calculate dimensions
-    const imgWidth = 210; // A4 width in mm
-    const pageHeight = 297; // A4 height in mm
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
-    let heightLeft = imgHeight;
+    // Use letter size (US standard)
+    const pdfWidth = 215.9; // Letter width in mm (8.5in)
+    const pdfHeight = 279.4; // Letter height in mm (11in)
 
-    // Create PDF
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    let position = 0;
+    // Calculate image dimensions to fit the page
+    const imgWidth = pdfWidth;
+    const imgHeight = (canvas.height * pdfWidth) / canvas.width;
 
-    // Add first page
-    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-    heightLeft -= pageHeight;
+    // Create PDF with letter size
+    const pdf = new jsPDF('p', 'mm', 'letter');
 
-    // Add additional pages if needed
-    while (heightLeft >= 0) {
-      position = heightLeft - imgHeight;
-      pdf.addPage();
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
+    // Fit to one page by scaling down if needed
+    if (imgHeight > pdfHeight) {
+      const scaleRatio = pdfHeight / imgHeight;
+      const scaledWidth = imgWidth * scaleRatio;
+      const scaledHeight = pdfHeight;
+      const xOffset = (pdfWidth - scaledWidth) / 2;
+      pdf.addImage(imgData, 'PNG', xOffset, 0, scaledWidth, scaledHeight);
+    } else {
+      // Center vertically if smaller than page
+      const yOffset = (pdfHeight - imgHeight) / 2;
+      pdf.addImage(imgData, 'PNG', 0, yOffset, imgWidth, imgHeight);
     }
 
     // Download the PDF

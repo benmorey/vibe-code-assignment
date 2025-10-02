@@ -55,6 +55,7 @@ export class ResumeParsingService {
 
   constructor() {
     const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+    console.log('API Key loaded:', apiKey ? `${apiKey.substring(0, 10)}...` : 'NOT FOUND');
     if (!apiKey) {
       throw new Error('VITE_GEMINI_API_KEY environment variable is required');
     }
@@ -181,12 +182,22 @@ export class ResumeParsingService {
 
   private async extractTextFromDocx(file: File): Promise<string> {
     try {
-      const arrayBuffer = await file.arrayBuffer();
-      const result = await mammoth.extractRawText({ arrayBuffer });
+      console.log('Starting Word document extraction...');
+      console.log('File type:', file.type);
+      console.log('File name:', file.name);
+      console.log('File size:', file.size);
 
-      if (result.value) {
+      const arrayBuffer = await file.arrayBuffer();
+      console.log('ArrayBuffer created, size:', arrayBuffer.byteLength);
+
+      const result = await mammoth.extractRawText({ arrayBuffer });
+      console.log('Mammoth result:', result);
+
+      if (result.value && result.value.trim().length > 0) {
+        console.log('Text extracted successfully, length:', result.value.length);
         return result.value;
       } else {
+        console.error('No text content found or empty result');
         throw new Error('No text content found in Word document');
       }
     } catch (error) {
@@ -196,7 +207,9 @@ export class ResumeParsingService {
   }
 
   private async parseResumeWithAI(resumeText: string): Promise<ParsedResumeData> {
-    const model = this.genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+    try {
+      console.log('Starting AI parsing with text length:', resumeText.length);
+      const model = this.genAI.getGenerativeModel({ model: "gemini-1.5-flash" }); // Using flash model which is more reliable
 
     const prompt = `
 Parse this resume text and extract structured information. Return the data in the following JSON format:
@@ -295,6 +308,10 @@ ${resumeText}
       return parsedData;
     } catch (error) {
       console.error('Error parsing resume with AI:', error);
+      throw new Error('Failed to parse resume content. Please try again or check the file format.');
+    }
+    } catch (error) {
+      console.error('Error in parseResumeWithAI:', error);
       throw new Error('Failed to parse resume content. Please try again or check the file format.');
     }
   }
