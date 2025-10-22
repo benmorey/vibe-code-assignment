@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+
 * {
   margin: 0;
   padding: 0;
@@ -5,12 +7,106 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  font-weight: 300;
   line-height: 1.6;
-  color: #1f2937;
-  background: #f8f9fa;
+  color: #003a1d;
+  background: linear-gradient(135deg, #FFF8E9 0%, #f0e5c8 100%) fixed;
   min-height: 100vh;
   overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+html {
+  background: linear-gradient(135deg, #FFF8E9 0%, #f0e5c8 100%) fixed;
+}
+
+body.dark-mode {
+  background: #111827;
+  color: #e5e7eb;
+}
+
+body.dark-mode .sidebar {
+  background: #1f2937;
+  border-right-color: #374151;
+}
+
+body.dark-mode .card {
+  background: #1f2937;
+  border-color: #374151;
+}
+
+body.dark-mode .tab {
+  color: #9ca3af;
+}
+
+body.dark-mode .tab.active {
+  color: #e5e7eb;
+  background: #374151;
+}
+
+body.dark-mode .tab.active::before {
+  background: #e5e7eb;
+}
+
+body.dark-mode .tab:hover {
+  color: #e5e7eb;
+  background: #374151;
+}
+
+body.dark-mode .form-input,
+body.dark-mode .form-textarea {
+  background: #111827;
+  border-color: #374151;
+  color: #e5e7eb;
+}
+
+body.dark-mode .form-input:focus,
+body.dark-mode .form-textarea:focus {
+  border-color: #6b7280;
+}
+
+body.dark-mode .form-label {
+  color: #d1d5db;
+}
+
+body.dark-mode .btn-primary {
+  background-color: #e5e7eb;
+  color: #111827;
+}
+
+body.dark-mode .btn-primary:hover {
+  background-color: #d1d5db;
+}
+
+body.dark-mode .btn-secondary {
+  background-color: #374151;
+  color: #e5e7eb;
+  border-color: #4b5563;
+}
+
+body.dark-mode .btn-secondary:hover {
+  background-color: #4b5563;
+}
+
+body.dark-mode .profile-item {
+  background-color: #111827;
+  border-color: #374151;
+}
+
+body.dark-mode .profile-item-title {
+  color: #e5e7eb;
+}
+
+body.dark-mode h1,
+body.dark-mode h2,
+body.dark-mode h3,
+body.dark-mode h4 {
+  color: #e5e7eb;
+}
+
+body.dark-mode p {
+  color: #9ca3af;
 }
 
 .container {
@@ -20,7 +116,7 @@ body {
 
 .sidebar {
   width: 280px;
-  background: #ffffff;
+  background: #FFFFFB;
   border-right: 1px solid #e5e7eb;
   padding: 30px 0;
   position: fixed;
@@ -29,6 +125,8 @@ body {
   bottom: 0;
   z-index: 100;
   transition: transform 0.3s ease;
+  display: flex;
+  flex-direction: column;
 }
 
 .main-content {
@@ -66,11 +164,11 @@ body {
   border: none;
   cursor: pointer;
   font-size: 15px;
-  color: #6b7280;
-  border-radius: 8px;
+  color: #003a1d;
+  border-radius: 20px;
   transition: all 0.2s ease;
   text-align: left;
-  font-weight: 500;
+  font-weight: 400;
   position: relative;
 }
 
@@ -81,15 +179,15 @@ body {
   top: 0;
   bottom: 0;
   width: 3px;
-  background: #1f2937;
+  background: #3a855b;
   transform: scaleY(0);
   transition: transform 0.2s ease;
 }
 
 .tab.active {
-  color: #1f2937;
-  background: #f3f4f6;
-  font-weight: 600;
+  color: #003a1d;
+  background: rgba(58, 133, 91, 0.1);
+  font-weight: 500;
 }
 
 .tab.active::before {
@@ -97,13 +195,13 @@ body {
 }
 
 .tab:hover {
-  color: #1f2937;
-  background: #f9fafb;
+  color: #003a1d;
+  background: rgba(58, 133, 91, 0.05);
 }
 
 .card {
-  background: #ffffff;
-  border-radius: 8px;
+  background: #FFFFFB;
+  border-radius: 20px;
   padding: 24px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   margin-bottom: 20px;
@@ -122,15 +220,15 @@ body {
 .form-label {
   display: block;
   margin-bottom: 4px;
-  font-weight: 500;
-  color: #374151;
+  font-weight: 400;
+  color: #003a1d;
 }
 
 .form-input {
   width: 100%;
   padding: 8px 12px;
   border: 1px solid #d1d5db;
-  border-radius: 4px;
+  border-radius: 20px;
   font-size: 14px;
 }
 
@@ -144,7 +242,7 @@ body {
   width: 100%;
   padding: 8px 12px;
   border: 1px solid #d1d5db;
-  border-radius: 4px;
+  border-radius: 20px;
   font-size: 14px;
   min-height: 100px;
   resize: vertical;
@@ -159,39 +257,39 @@ body {
 .btn {
   padding: 8px 16px;
   border: none;
-  border-radius: 4px;
+  border-radius: 20px;
   cursor: pointer;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 400;
   transition: all 0.2s ease;
 }
 
 .btn-primary {
-  background-color: #1f2937;
-  color: white;
+  background-color: #16442d;
+  color: #FFFFFB;
 }
 
 .btn-primary:hover {
-  background-color: #111827;
+  background-color: #3a855b;
 }
 
 .btn-secondary {
-  background-color: #f3f4f6;
-  color: #1f2937;
-  border: 1px solid #d1d5db;
+  background-color: #16442d;
+  color: #FFFFFB;
+  border: 1px solid #16442d;
 }
 
 .btn-secondary:hover {
-  background-color: #e5e7eb;
+  background-color: #3a855b;
 }
 
 .btn-danger {
-  background-color: #dc2626;
-  color: white;
+  background-color: #16442d;
+  color: #FFFFFB;
 }
 
 .btn-danger:hover {
-  background-color: #b91c1c;
+  background-color: #3a855b;
 }
 
 .dropdown {
@@ -206,7 +304,7 @@ body {
   min-width: 200px;
   box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
   z-index: 1;
-  border-radius: 4px;
+  border-radius: 20px;
   border: 1px solid #d1d5db;
 }
 
@@ -234,28 +332,55 @@ body {
 
 .profile-item {
   border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  padding: 16px;
-  margin-bottom: 12px;
-  background-color: #fafafa;
+  border-radius: 20px;
+  padding: 20px;
+  margin-bottom: 16px;
+  background-color: #FFF8E9;
 }
 
 .profile-item-header {
   display: flex;
-  justify-content: between;
+  justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: 16px;
 }
 
 .profile-item-title {
-  font-weight: 600;
-  color: #1f2937;
+  font-weight: 500;
+  color: #003a1d;
+  font-size: 16px;
+}
+
+.profile-item-header .btn {
+  border-radius: 20px;
+  padding: 8px 20px;
+}
+
+.profile-item-header .btn-danger {
+  background-color: #16442d;
+  color: #FFFFFB;
+}
+
+.profile-item-header .btn-danger:hover {
+  background-color: #3a855b;
+}
+
+.profile-item .btn-danger {
+  background-color: #16442d;
+  color: #FFFFFB;
+  border-radius: 20px;
+  padding: 6px 16px;
+  font-size: 13px;
+}
+
+.profile-item .btn-danger:hover {
+  background-color: #3a855b;
 }
 
 .resume-preview {
   background: white;
   padding: 15px;
-  border-radius: 8px;
+  border-radius: 20px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   font-family: 'Times New Roman', serif;
   line-height: 1.15;

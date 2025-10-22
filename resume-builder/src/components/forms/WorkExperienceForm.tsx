@@ -30,6 +30,11 @@ const WorkExperienceForm: React.FC<WorkExperienceFormProps> = ({ data, onChange,
     handleChange('description', newDescription);
   };
 
+  const autoResize = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    e.target.style.height = 'auto';
+    e.target.style.height = e.target.scrollHeight + 'px';
+  };
+
   return (
     <div className="profile-item">
       <div className="profile-item-header">
@@ -101,18 +106,23 @@ const WorkExperienceForm: React.FC<WorkExperienceFormProps> = ({ data, onChange,
         <label className="form-label">Job Description & Achievements</label>
         {data.description.map((point, index) => (
           <div key={index} style={{ display: 'flex', marginBottom: '8px' }}>
-            <input
-              type="text"
-              className="form-input"
+            <textarea
+              className="form-textarea"
               value={point}
-              onChange={(e) => handleDescriptionChange(index, e.target.value)}
+              onChange={(e) => {
+                handleDescriptionChange(index, e.target.value);
+                autoResize(e);
+              }}
+              onInput={autoResize}
               placeholder="• Describe your responsibilities and achievements..."
-              style={{ marginRight: '8px' }}
+              style={{ marginRight: '8px', minHeight: '60px', resize: 'vertical', overflow: 'hidden' }}
+              rows={2}
             />
             <button
               type="button"
               className="btn btn-danger"
               onClick={() => removeDescriptionPoint(index)}
+              style={{ height: 'fit-content' }}
             >
               Remove
             </button>

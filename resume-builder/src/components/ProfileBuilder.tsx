@@ -8,7 +8,7 @@ import PDFImporter from './PDFImporter';
 
 interface ProfileBuilderProps {
   profileData: ProfileData;
-  onSave: (data: ProfileData) => void;
+  onSave: (data: ProfileData, triggerFade?: boolean) => void;
 }
 
 const ProfileBuilder: React.FC<ProfileBuilderProps> = ({ profileData, onSave }) => {
@@ -90,9 +90,9 @@ const ProfileBuilder: React.FC<ProfileBuilderProps> = ({ profileData, onSave }) 
     setCurrentData(mergedData);
     setSaveStatus('idle');
 
-    // Auto-save the imported data
+    // Auto-save the imported data with fade-in animation
     setTimeout(() => {
-      onSave(mergedData);
+      onSave(mergedData, true);
     }, 100);
   };
 
@@ -162,13 +162,27 @@ const ProfileBuilder: React.FC<ProfileBuilderProps> = ({ profileData, onSave }) 
   };
 
   return (
-    <div>
-      <PDFImporter
-        onProfileImported={handlePDFImport}
-      />
+    <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+      <PDFImporter onProfileImported={handlePDFImport} />
+
+      <div style={{ marginBottom: '32px' }}>
+        <h1 style={{ fontSize: '32px', fontWeight: '700', color: '#1f2937', marginBottom: '8px' }}>
+          Build Your Profile
+        </h1>
+        <p style={{ fontSize: '16px', color: '#6b7280', marginBottom: '24px' }}>
+          Create a comprehensive professional profile to generate tailored resumes
+        </p>
+      </div>
 
       <div className="card">
-        <h2 style={{ marginBottom: '20px', color: '#1f2937' }}>Personal Information</h2>
+        <div style={{ borderBottom: '2px solid #f3f4f6', paddingBottom: '16px', marginBottom: '24px' }}>
+          <h2 style={{ fontSize: '24px', fontWeight: '600', color: '#1f2937', marginBottom: '4px' }}>
+            Personal Information
+          </h2>
+          <p style={{ fontSize: '14px', color: '#6b7280' }}>
+            Basic contact details and professional links
+          </p>
+        </div>
         <PersonalInfoForm
           data={currentData.personalInfo}
           onChange={handlePersonalInfoChange}
@@ -176,7 +190,14 @@ const ProfileBuilder: React.FC<ProfileBuilderProps> = ({ profileData, onSave }) 
       </div>
 
       <div className="card">
-        <h2 style={{ marginBottom: '20px', color: '#1f2937' }}>About Me</h2>
+        <div style={{ borderBottom: '2px solid #f3f4f6', paddingBottom: '16px', marginBottom: '24px' }}>
+          <h2 style={{ fontSize: '24px', fontWeight: '600', color: '#1f2937', marginBottom: '4px' }}>
+            About Me
+          </h2>
+          <p style={{ fontSize: '14px', color: '#6b7280' }}>
+            A brief professional summary or personal statement
+          </p>
+        </div>
         <AboutMeForm
           data={currentData.aboutMe}
           onChange={handleAboutMeChange}
@@ -184,64 +205,73 @@ const ProfileBuilder: React.FC<ProfileBuilderProps> = ({ profileData, onSave }) 
       </div>
 
       <div className="card">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-          <h2 style={{ color: '#1f2937' }}>Experience & Skills</h2>
+        <div style={{ borderBottom: '2px solid #f3f4f6', paddingBottom: '16px', marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <div>
+            <h2 style={{ fontSize: '24px', fontWeight: '600', color: '#1f2937', marginBottom: '4px' }}>
+              Experience & Skills
+            </h2>
+            <p style={{ fontSize: '14px', color: '#6b7280' }}>
+              Add your education, work history, projects, and skills
+            </p>
+          </div>
           <AddExperienceDropdown onAdd={addExperience} />
         </div>
 
-        <ExperienceSection
-          title="Education"
-          type="education"
-          items={currentData.education}
-          onChange={(data) => handleExperienceChange('education', data)}
-        />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+          <ExperienceSection
+            title="Education"
+            type="education"
+            items={currentData.education}
+            onChange={(data) => handleExperienceChange('education', data)}
+          />
 
-        <ExperienceSection
-          title="Work Experience"
-          type="workExperience"
-          items={currentData.workExperience}
-          onChange={(data) => handleExperienceChange('workExperience', data)}
-        />
+          <ExperienceSection
+            title="Work Experience"
+            type="workExperience"
+            items={currentData.workExperience}
+            onChange={(data) => handleExperienceChange('workExperience', data)}
+          />
 
-        <ExperienceSection
-          title="Projects"
-          type="projects"
-          items={currentData.projects}
-          onChange={(data) => handleExperienceChange('projects', data)}
-        />
+          <ExperienceSection
+            title="Projects"
+            type="projects"
+            items={currentData.projects}
+            onChange={(data) => handleExperienceChange('projects', data)}
+          />
 
-        <ExperienceSection
-          title="Volunteer Work"
-          type="volunteerWork"
-          items={currentData.volunteerWork}
-          onChange={(data) => handleExperienceChange('volunteerWork', data)}
-        />
+          <ExperienceSection
+            title="Volunteer Work"
+            type="volunteerWork"
+            items={currentData.volunteerWork}
+            onChange={(data) => handleExperienceChange('volunteerWork', data)}
+          />
 
-        <ExperienceSection
-          title="Skills"
-          type="skills"
-          items={currentData.skills}
-          onChange={(data) => handleExperienceChange('skills', data)}
-        />
+          <ExperienceSection
+            title="Skills"
+            type="skills"
+            items={currentData.skills}
+            onChange={(data) => handleExperienceChange('skills', data)}
+          />
+        </div>
       </div>
 
-      <div style={{ textAlign: 'center', marginTop: '30px' }}>
+      <div style={{ textAlign: 'center', marginTop: '40px', marginBottom: '40px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '15px' }}>
           <button
             className="btn btn-primary"
             onClick={handleSave}
-            style={{ fontSize: '16px', padding: '12px 24px' }}
+            style={{ fontSize: '16px', padding: '14px 32px', borderRadius: '8px' }}
             disabled={saveStatus === 'saving'}
           >
             {saveStatus === 'saving' ? 'Saving...' : 'Save Profile'}
           </button>
           {saveStatus === 'saved' && (
-            <span style={{ color: '#059669', fontSize: '14px', fontWeight: '500' }}>
-              ✓ Auto-saved
+            <span style={{ color: '#059669', fontSize: '14px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ fontSize: '18px' }}>✓</span> Auto-saved
             </span>
           )}
         </div>
-        <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '10px' }}>
+        <p style={{ fontSize: '13px', color: '#9ca3af', marginTop: '12px' }}>
           Your profile is automatically saved as you type
         </p>
       </div>

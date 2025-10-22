@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { NetworkService } from '../services/networkService';
+import { Application } from './ApplicationTracker';
 
 interface Job {
   id: string;
@@ -27,8 +29,40 @@ const JobSearch: React.FC<JobSearchProps> = ({ onJobSelect, profileData }) => {
   const [locationFilter, setLocationFilter] = useState('');
   const [salaryFilter, setSalaryFilter] = useState<'all' | 'high' | 'medium' | 'low'>('all');
   const [dateFilter, setDateFilter] = useState<'all' | 'today' | 'week' | 'month'>('all');
+  const [networkFilter, setNetworkFilter] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showRecommended, setShowRecommended] = useState(false);
+
+  // Add job to application tracker with pending status
+  const addToApplicationTracker = (job: Job) => {
+    const applications = localStorage.getItem('jobApplications');
+    const existingApps: Application[] = applications ? JSON.parse(applications) : [];
+
+    // Check if already added
+    const alreadyExists = existingApps.some(app =>
+      app.company.toLowerCase() === job.company.toLowerCase() &&
+      app.position.toLowerCase() === job.title.toLowerCase()
+    );
+
+    if (alreadyExists) {
+      return; // Silently skip if already exists
+    }
+
+    const newApp: Application = {
+      id: Date.now().toString(),
+      company: job.company,
+      position: job.title,
+      dateApplied: new Date().toISOString().split('T')[0],
+      status: 'pending',
+      jobUrl: job.url,
+      location: job.location,
+      salary: job.salary,
+      notes: job.description.substring(0, 200) + '...'
+    };
+
+    existingApps.unshift(newApp);
+    localStorage.setItem('jobApplications', JSON.stringify(existingApps));
+  };
 
   const getRecommendedJobs = async () => {
     if (!profileData) {
@@ -173,32 +207,67 @@ const JobSearch: React.FC<JobSearchProps> = ({ onJobSelect, profileData }) => {
     setShowRecommended(false);
 
     try {
-      // Since we can't directly access job board APIs without CORS issues,
-      // we'll use a public API or create mock data for demonstration
-      // For production, you'd want a backend proxy to handle API calls
-
-      // Using Remotive API (remote jobs, no auth required)
-      const response = await fetch(`https://remotive.com/api/remote-jobs?search=${encodeURIComponent(searchQuery)}`);
+      // Using TheirStack API
+      const response = await fetch('https://api.theirstack.com/v1/jobs/search', {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhLmNvbXBhbnkuaWRlYS5mb3Iuc2FuZGJveEBnbWFpbC5jb20iLCJwZXJtaXNzaW9ucyI6InVzZXIiLCJjcmVhdGVkX2F0IjoiMjAyNS0xMC0wM1QwMjoyNzowMi4yOTM4MjYrMDA6MDAifQ.Bh8e7hbXhdaXT60OcnZgBJG1wCzoGrdF8sKWCItWGBo'
+        },
+        body: JSON.stringify({
+          page: 0,
+          limit: 50,
+          posted_at_max_age_days: 30,
+          blur_company_data: false,
+          order_by: [
+            {
+              desc: true,
+              field: 'date_posted'
+            }
+          ],
+          job_country_code_or: ['US'],
+          include_total_results: false,
+          job_title_or: [searchQuery],
+          ...(locationQuery && { job_location_pattern_or: [locationQuery] })
+        })
+      });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch jobs');
+        throw new Error('Failed to fetch jobs from TheirStack API');
       }
 
       const data = await response.json();
 
-      // Transform the data to our format
-      const transformedJobs: Job[] = data.jobs.map((job: any) => ({
-        id: job.id.toString(),
-        title: job.title,
-        company: job.company_name,
-        location: job.candidate_required_location || 'Remote',
-        description: job.description,
-        url: job.url,
-        salary: job.salary || 'Not specified',
-        postedDate: job.publication_date,
-        source: 'Remotive'
-      }));
+      console.log('TheirStack API Response:', data);
 
+      // Check if we have data
+      if (!data || !data.data || data.data.length === 0) {
+        setError('No jobs found. Try different keywords or location.');
+        setJobs([]);
+        return;
+      }
+
+      console.log('First job sample:', data.data[0]);
+
+      // Transform TheirStack data to our format
+      const transformedJobs: Job[] = data.data.map((job: any) => {
+        console.log('Processing job:', job);
+
+        return {
+          id: job.id || Math.random().toString(),
+          title: job.job_title || job.title || 'No title',
+          company: job.company?.name || job.company_name || job.company || 'Unknown Company',
+          location: job.job_location || job.location || 'Not specified',
+          description: job.job_description || job.description || 'No description available',
+          url: job.job_url || job.url || job.application_url || '#',
+          salary: job.salary_range || job.salary || job.compensation || 'Not specified',
+          postedDate: job.posted_at || job.date_posted || job.created_at || new Date().toISOString(),
+          source: 'TheirStack'
+        };
+      });
+
+      console.log('Transformed jobs:', transformedJobs);
       setJobs(transformedJobs);
     } catch (err) {
       console.error('Job search error:', err);
@@ -229,6 +298,11 @@ const JobSearch: React.FC<JobSearchProps> = ({ onJobSelect, profileData }) => {
   };
 
   const filteredJobs = jobs.filter(job => {
+    // Network filter - only show companies where you have connections
+    if (networkFilter && !NetworkService.hasConnectionAt(job.company)) {
+      return false;
+    }
+
     // Title filter
     if (titleFilter.trim() !== '' && !job.title.toLowerCase().includes(titleFilter.toLowerCase())) {
       return false;
@@ -410,6 +484,21 @@ const JobSearch: React.FC<JobSearchProps> = ({ onJobSelect, profileData }) => {
                     placeholder="Filter by location..."
                   />
                 </div>
+              </div>
+
+              {/* Network Filter Toggle */}
+              <div style={{ marginBottom: '15px' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', padding: '10px', background: networkFilter ? '#ecfdf5' : '#f9fafb', borderRadius: '8px', border: `2px solid ${networkFilter ? '#10b981' : '#e5e7eb'}` }}>
+                  <input
+                    type="checkbox"
+                    checked={networkFilter}
+                    onChange={(e) => setNetworkFilter(e.target.checked)}
+                    style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                  />
+                  <span style={{ fontWeight: '500', color: networkFilter ? '#10b981' : '#6b7280' }}>
+                    🤝 Only show companies where I have connections
+                  </span>
+                </label>
               </div>
 
               <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
@@ -642,6 +731,7 @@ const JobSearch: React.FC<JobSearchProps> = ({ onJobSelect, profileData }) => {
                     style={{ fontSize: '12px', padding: '6px 12px' }}
                     onClick={(e) => {
                       e.stopPropagation();
+                      addToApplicationTracker(job);
                       window.open(job.url, '_blank');
                     }}
                   >

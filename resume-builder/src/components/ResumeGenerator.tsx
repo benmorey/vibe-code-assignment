@@ -160,59 +160,113 @@ const ResumeGenerator: React.FC<ResumeGeneratorProps> = ({ profileData, onProfil
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', height: 'calc(100vh - 200px)' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', height: 'calc(100vh - 100px)' }}>
       {/* Top Panel - Job Description & Analysis Controls */}
       <div className="card" style={{ flex: '0 0 auto' }}>
-        <h3 style={{ marginBottom: '15px', color: '#1f2937' }}>🎯 ATS Resume Analysis</h3>
+        <h3 style={{ marginBottom: '20px', color: '#1f2937', fontSize: '20px' }}>🎯 ATS Resume Analysis</h3>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 2fr', gap: '15px', alignItems: 'end' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+          {/* Job Description Input */}
           <div className="form-group" style={{ margin: 0 }}>
-            <label className="form-label">Company (Optional)</label>
-            <input
-              type="text"
-              className="form-input"
-              value={companyName}
-              onChange={(e) => setCompanyName(e.target.value)}
-              placeholder="e.g., Google"
-            />
-          </div>
-
-          <div className="form-group" style={{ margin: 0 }}>
-            <button
-              className="btn btn-primary"
-              onClick={handleAnalyzeResume}
-              disabled={isAnalyzing || !jobDescription.trim()}
-              style={{ width: '100%', height: '42px' }}
-            >
-              {isAnalyzing ? (
-                <>
-                  <div className="spinner" style={{ width: '16px', height: '16px', marginRight: '8px' }}></div>
-                  Analyzing...
-                </>
-              ) : (
-                '🔍 Run ATS Analysis'
-              )}
-            </button>
-          </div>
-
-          <div className="form-group" style={{ margin: 0 }}>
-            <label className="form-label">Job Description *</label>
+            <label className="form-label" style={{ fontSize: '14px', fontWeight: '500', marginBottom: '8px' }}>
+              Job Description *
+            </label>
             <textarea
               className="form-textarea"
               value={jobDescription}
               onChange={(e) => setJobDescription(e.target.value)}
-              placeholder="Paste job description here for ATS keyword analysis..."
-              style={{ minHeight: '42px', fontSize: '14px', resize: 'vertical' }}
+              placeholder="Paste the job description here for ATS keyword analysis..."
+              style={{ minHeight: '100px', fontSize: '14px', resize: 'vertical' }}
             />
+          </div>
+
+          {/* Company Name and Action Buttons Row */}
+          <div style={{ display: 'flex', gap: '15px', alignItems: 'flex-end' }}>
+            <div className="form-group" style={{ margin: 0, flex: 1 }}>
+              <label className="form-label" style={{ fontSize: '14px', fontWeight: '500', marginBottom: '8px' }}>
+                Company Name (Optional)
+              </label>
+              <input
+                type="text"
+                className="form-input"
+                value={companyName}
+                onChange={(e) => setCompanyName(e.target.value)}
+                placeholder="e.g., Google, Microsoft, Amazon"
+                style={{ height: '42px' }}
+              />
+            </div>
+
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button
+                className="btn btn-primary"
+                onClick={handleAnalyzeResume}
+                disabled={isAnalyzing || !jobDescription.trim()}
+                style={{
+                  height: '42px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  fontSize: '15px',
+                  fontWeight: '500',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                {isAnalyzing ? (
+                  <>
+                    <div className="spinner" style={{ width: '16px', height: '16px' }}></div>
+                    Analyzing...
+                  </>
+                ) : (
+                  <>🔍 Run ATS Analysis</>
+                )}
+              </button>
+
+              <button
+                className="btn btn-secondary"
+                onClick={handleGenerateCoverLetter}
+                disabled={isGenerating || !jobDescription.trim()}
+                style={{
+                  height: '42px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '15px',
+                  fontWeight: '500',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                {isGenerating ? 'Generating...' : '📝 Generate Cover Letter'}
+              </button>
+
+              {coverLetter && (
+                <button
+                  className="btn btn-secondary"
+                  onClick={handleImproveCoverLetter}
+                  disabled={isGenerating}
+                  style={{
+                    height: '42px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '15px',
+                    fontWeight: '500',
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  ✨ Improve Letter
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>
 
       {/* Main Content - Side by Side Layout */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 400px', gap: '20px', flex: 1, overflow: 'hidden' }}>
-        {/* Left - Resume Preview */}
+      <div style={{ display: 'grid', gridTemplateColumns: '2fr 400px', gap: '20px', flex: 1, overflow: 'hidden', minHeight: 0 }}>
+        {/* Left - Resume/Cover Letter Preview */}
         <div className="card" style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-          <div className="tabs" style={{ borderBottom: '1px solid #e5e7eb', marginBottom: '20px', flexShrink: 0 }}>
+          <div style={{ display: 'flex', gap: '8px', marginBottom: '20px' }}>
             <button
               className={`tab ${activeTab === 'resume' ? 'active' : ''}`}
               onClick={() => setActiveTab('resume')}
@@ -495,32 +549,6 @@ const ResumeGenerator: React.FC<ResumeGeneratorProps> = ({ profileData, onProfil
           )}
         </div>
       </div>
-
-      {/* Cover Letter Quick Actions */}
-      {activeTab === 'cover-letter' && (
-        <div className="card" style={{ flex: '0 0 auto' }}>
-          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-            <button
-              className="btn btn-secondary"
-              onClick={handleGenerateCoverLetter}
-              disabled={isGenerating || !jobDescription.trim()}
-              style={{ flex: 1 }}
-            >
-              {isGenerating ? 'Generating...' : '📝 Generate Enhanced Cover Letter'}
-            </button>
-            {coverLetter && (
-              <button
-                className="btn btn-secondary"
-                onClick={handleImproveCoverLetter}
-                disabled={isGenerating}
-                style={{ flex: 1 }}
-              >
-                ✨ Improve Letter with AI
-              </button>
-            )}
-          </div>
-        </div>
-      )}
 
       {error && (
         <div style={{

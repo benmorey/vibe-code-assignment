@@ -13,6 +13,7 @@ interface ImportStatus {
 
 const PDFImporter: React.FC<PDFImporterProps> = ({ onProfileImported }) => {
   const [importStatus, setImportStatus] = useState<ImportStatus>({ type: 'idle', message: '' });
+  const [hasImported, setHasImported] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const pdfExtractor = new PDFTextExtractor();
 
@@ -79,6 +80,9 @@ const PDFImporter: React.FC<PDFImporterProps> = ({ onProfileImported }) => {
         message: `✅ Successfully imported resume data from ${file.name}!`
       });
 
+      // Mark as imported
+      setHasImported(true);
+
       // Clear the file input
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
@@ -97,39 +101,13 @@ const PDFImporter: React.FC<PDFImporterProps> = ({ onProfileImported }) => {
     event.preventDefault();
   };
 
+  // Don't render if already imported
+  if (hasImported) {
+    return null;
+  }
+
   return (
-    <div className="card">
-      <h3>📄 Populate with Resume</h3>
-      <p style={{ marginBottom: '20px', color: '#666' }}>
-        Upload your existing resume PDF and we'll automatically extract the information to populate your profile.
-      </p>
-
-      <div
-        className="pdf-drop-area"
-        onDrop={handleDrop}
-        onDragOver={handleDragOver}
-        onClick={() => fileInputRef.current?.click()}
-        style={{
-          border: '2px dashed #d1d5db',
-          borderRadius: '8px',
-          padding: '40px 20px',
-          textAlign: 'center',
-          cursor: 'pointer',
-          backgroundColor: '#fafafa',
-          transition: 'all 0.3s ease'
-        }}
-      >
-        <div>
-          <div style={{ fontSize: '48px', marginBottom: '16px' }}>📄</div>
-          <h4 style={{ margin: '0 0 8px 0', color: '#374151' }}>
-            Drop your PDF here or click to select
-          </h4>
-          <p style={{ margin: '0', color: '#6b7280', fontSize: '14px' }}>
-            Supports PDF files up to 10MB
-          </p>
-        </div>
-      </div>
-
+    <>
       <input
         ref={fileInputRef}
         type="file"
@@ -141,7 +119,7 @@ const PDFImporter: React.FC<PDFImporterProps> = ({ onProfileImported }) => {
       {importStatus.type !== 'idle' && (
         <div
           style={{
-            marginTop: '20px',
+            marginBottom: '20px',
             padding: '12px',
             borderRadius: '6px',
             fontSize: '14px',
@@ -175,19 +153,7 @@ const PDFImporter: React.FC<PDFImporterProps> = ({ onProfileImported }) => {
           {importStatus.type !== 'loading' && importStatus.message}
         </div>
       )}
-
-      <div style={{ marginTop: '16px', fontSize: '12px', color: '#6b7280' }}>
-        <strong>What gets imported:</strong>
-        <ul style={{ margin: '8px 0', paddingLeft: '20px' }}>
-          <li>Personal information (name, email, phone)</li>
-          <li>Skills and technologies</li>
-          <li>Work experience and job titles</li>
-          <li>Education background</li>
-          <li>Summary/about me section</li>
-        </ul>
-        <em>Note: You can edit and refine all imported data after import.</em>
-      </div>
-    </div>
+    </>
   );
 };
 
