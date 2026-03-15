@@ -1,0 +1,21 @@
+{
+  "name": "commander-stats",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/mobile",
+    "apps/desktop",
+    "packages/shared"
+  ],
+  "scripts": {
+    "mobile": "yarn workspace @commander-stats/mobile start",
+    "mobile:ios": "yarn workspace @commander-stats/mobile ios",
+    "mobile:android": "yarn workspace @commander-stats/mobile android",
+    "mobile:web": "yarn workspace @commander-stats/mobile web",
+    "desktop": "yarn workspace @commander-stats/desktop start",
+    "desktop:build": "yarn workspace @commander-stats/desktop build"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  }
+}
